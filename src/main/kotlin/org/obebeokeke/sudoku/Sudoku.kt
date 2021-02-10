@@ -25,9 +25,3 @@ class Sudoku {
         return response.body()!!.board
     }
 }
-
-fun main() {
-    var a = Sudoku().getBoard()
-
-    print(a)
-}
