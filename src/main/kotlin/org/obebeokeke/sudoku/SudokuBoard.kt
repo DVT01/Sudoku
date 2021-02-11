@@ -1,6 +1,5 @@
 package org.obebeokeke.sudoku
 
-class SudokuBoard {
-
-    lateinit var board: List<List<Int>>
-}
+data class SudokuBoard(
+    var board: List<List<Int>>
+)
