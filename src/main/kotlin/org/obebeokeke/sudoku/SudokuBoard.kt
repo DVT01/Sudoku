@@ -1,5 +1,5 @@
 package org.obebeokeke.sudoku
 
 data class SudokuBoard(
-    var board: List<List<Int>>
+    var board: MutableList<MutableList<Int>>
 )
