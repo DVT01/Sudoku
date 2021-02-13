@@ -10,7 +10,7 @@ class Sudoku {
     private var retrofit: Retrofit
     private var sudokuApi: SudokuApi
 
-    private var originalBoard: MutableList<MutableList<Int>>
+    private val originalBoard: MutableList<MutableList<Int>>
     private var board: MutableList<MutableList<Int>>
     private var solvedBoard: MutableList<MutableList<Int>>
 
@@ -22,8 +22,19 @@ class Sudoku {
         sudokuApi = retrofit.create(SudokuApi::class.java)
 
         this.originalBoard = fetchSudokuBoard()
-        this.board = this.originalBoard.toMutableList()
-        this.solvedBoard = this.originalBoard.toMutableList()
+        this.board = mutableListOf()
+        this.solvedBoard = mutableListOf()
+
+        // Copy the original board to the solved board and editable board
+        this.originalBoard.forEachIndexed { index, row ->
+            this.board.add(mutableListOf())
+            this.solvedBoard.add(mutableListOf())
+
+            for (number in row) {
+                this.board[index].add(number)
+                this.solvedBoard[index].add(number)
+            }
+        }
     }
 
     private fun fetchSudokuBoard(): MutableList<MutableList<Int>> {
@@ -50,8 +61,8 @@ class Sudoku {
 
         // Utilizing a recursive backtracking algorithm
         // Search for the first valid number that I can put in that cell
-        for (rowIndex in 0 until this.solvedBoard.count()) {
-            for (columnIndex in 0 until this.solvedBoard[rowIndex].count()) {
+        for (rowIndex in this.solvedBoard.indices) {
+            for (columnIndex in this.solvedBoard.indices) {
 
                 // Search for an empty cell
                 if (this.solvedBoard[rowIndex][columnIndex] == EMPTY) {
@@ -88,7 +99,7 @@ class Sudoku {
     ): Boolean {
 
         // Checks if there are repeating numbers in a column or row
-        for (index in 0 until this.solvedBoard.count()) {
+        for (index in this.solvedBoard.indices) {
             if (this.solvedBoard[row][index] == number) return false
             if (this.solvedBoard[index][column] == number) return false
         }
@@ -98,7 +109,7 @@ class Sudoku {
         lateinit var rowRange: IntRange
 
         // Search which 3x3 grid the cell is in
-        for (start in 0 until this.solvedBoard.count() step 3) {
+        for (start in this.solvedBoard.indices step 3) {
             val end = start + 2
 
             if (row in start..end) {
@@ -125,22 +136,46 @@ class Sudoku {
     private fun isComplete(board: MutableList<MutableList<Int>>): Boolean {
 
         // Go through every cell to see if it's empty
-        for (row in board) {
-            for (number in row) {
-                if (number == EMPTY) return false
-            }
+        for (row in board.indices) {
+            if (board[row].contains(EMPTY)) return false
         }
 
         return true
     }
 
-    fun fillCell(rowIndex: Int, columnIndex: Int, number: Int): Boolean {
+    fun fillCell(rowIndex: Int, columnIndex: Int, number: Int) {
+
+        // Check if the indexes are valid
+        if (!isValidIndex(rowIndex, columnIndex)) {
+            return
+        }
 
         // Make sure cell is empty and the number is from 1 to 9
         if (this.board[rowIndex][columnIndex] == EMPTY && number in 1..9) {
             this.board[rowIndex][columnIndex] = number
-            return true
         }
+    }
+
+    fun emptyCell(rowIndex: Int, columnIndex: Int) {
+
+        // Check if the indexes are valid
+        if (!isValidIndex(rowIndex, columnIndex)) {
+            return
+        }
+
+        // Check if cell was originally empty
+        if (this.originalBoard[rowIndex][columnIndex] == EMPTY) {
+            this.board[rowIndex][columnIndex] = EMPTY
+        }
+    }
+
+    private fun isValidIndex(rowIndex: Int, columnIndex: Int): Boolean {
+
+        if (
+            rowIndex in 0 until this.board.count() &&
+            columnIndex in 0 until this.board.count()
+        )
+            return true
 
         return false
     }
